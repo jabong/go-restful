@@ -3,8 +3,8 @@ package swagger
 import (
 	"fmt"
 
-	"github.com/emicklei/go-restful"
-	// "github.com/emicklei/hopwatch"
+	"github.com/jabong/go-restful"
+	// "github.com/jabong/hopwatch"
 	"log"
 	"net/http"
 	"reflect"

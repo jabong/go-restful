@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/emicklei/go-restful"
+	"github.com/jabong/go-restful"
 )
 
 // This example show how to test one particular RouteFunction (getIt)

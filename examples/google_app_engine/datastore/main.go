@@ -4,8 +4,8 @@ import (
 	"appengine"
 	"appengine/datastore"
 	"appengine/user"
-	"github.com/emicklei/go-restful"
-	"github.com/emicklei/go-restful/swagger"
+	"github.com/jabong/go-restful"
+	"github.com/jabong/go-restful/swagger"
 	"net/http"
 	"time"
 )

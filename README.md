@@ -34,7 +34,7 @@ func (u UserResource) findUser(request *restful.Request, response *restful.Respo
 }
 ```
 	
-[Full API of a UserResource](https://github.com/emicklei/go-restful/tree/master/examples/restful-user-resource.go) 
+[Full API of a UserResource](https://github.com/jabong/go-restful/tree/master/examples/restful-user-resource.go) 
 		
 ### Features
 
@@ -55,15 +55,15 @@ func (u UserResource) findUser(request *restful.Request, response *restful.Respo
 	
 ### Resources
 
-- [Documentation on godoc.org](http://godoc.org/github.com/emicklei/go-restful)
-- [Code examples](https://github.com/emicklei/go-restful/tree/master/examples)
+- [Documentation on godoc.org](http://godoc.org/github.com/jabong/go-restful)
+- [Code examples](https://github.com/jabong/go-restful/tree/master/examples)
 - [Example posted on blog](http://ernestmicklei.com/2012/11/24/go-restful-first-working-example/)
 - [Design explained on blog](http://ernestmicklei.com/2012/11/11/go-restful-api-design/)
-- [sourcegraph](https://sourcegraph.com/github.com/emicklei/go-restful)
-- [gopkg.in](https://gopkg.in/emicklei/go-restful.v1)
-- [showcase: Mora - MongoDB REST Api server](https://github.com/emicklei/mora)
+- [sourcegraph](https://sourcegraph.com/github.com/jabong/go-restful)
+- [gopkg.in](https://gopkg.in/jabong/go-restful.v1)
+- [showcase: Mora - MongoDB REST Api server](https://github.com/jabong/mora)
 
-[![Build Status](https://drone.io/github.com/emicklei/go-restful/status.png)](https://drone.io/github.com/emicklei/go-restful/latest)[![library users](https://sourcegraph.com/api/repos/github.com/emicklei/go-restful/badges/library-users.png)](https://sourcegraph.com/github.com/emicklei/go-restful) [![authors](https://sourcegraph.com/api/repos/github.com/emicklei/go-restful/badges/authors.png)](https://sourcegraph.com/github.com/emicklei/go-restful) [![xrefs](https://sourcegraph.com/api/repos/github.com/emicklei/go-restful/badges/xrefs.png)](https://sourcegraph.com/github.com/emicklei/go-restful)
+[![Build Status](https://drone.io/github.com/jabong/go-restful/status.png)](https://drone.io/github.com/jabong/go-restful/latest)[![library users](https://sourcegraph.com/api/repos/github.com/jabong/go-restful/badges/library-users.png)](https://sourcegraph.com/github.com/jabong/go-restful) [![authors](https://sourcegraph.com/api/repos/github.com/jabong/go-restful/badges/authors.png)](https://sourcegraph.com/github.com/jabong/go-restful) [![xrefs](https://sourcegraph.com/api/repos/github.com/jabong/go-restful/badges/xrefs.png)](https://sourcegraph.com/github.com/jabong/go-restful)
 
 (c) 2012 - 2014, http://ernestmicklei.com. MIT License
 

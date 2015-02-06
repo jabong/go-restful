@@ -3,7 +3,7 @@ package swagger
 import (
 	"net/http"
 
-	"github.com/emicklei/go-restful"
+	"github.com/jabong/go-restful"
 )
 
 type Config struct {

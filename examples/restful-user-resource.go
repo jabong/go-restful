@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/emicklei/go-restful"
-	"github.com/emicklei/go-restful/swagger"
+	"github.com/jabong/go-restful"
+	"github.com/jabong/go-restful/swagger"
 )
 
 // This example show a complete (GET,PUT,POST,DELETE) conventional example of
@@ -144,7 +144,7 @@ func main() {
 
 		// Optionally, specifiy where the UI is located
 		SwaggerPath:     "/apidocs/",
-		SwaggerFilePath: "/Users/emicklei/xProjects/swagger-ui/dist"}
+		SwaggerFilePath: "/Users/jabong/xProjects/swagger-ui/dist"}
 	swagger.RegisterSwaggerService(config, wsContainer)
 
 	log.Printf("start listening on localhost:8080")

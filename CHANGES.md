@@ -121,7 +121,7 @@ Important API changes:
 
 [2012-11-14 .. 2013-05-18>
  
- - See https://github.com/emicklei/go-restful/commits
+ - See https://github.com/jabong/go-restful/commits
 
 2012-11-14
 
