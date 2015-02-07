@@ -21,6 +21,13 @@ type Rejoinder struct {
     Total       int    `json:"total,omitempty"`
 }
 
+// Added by apoorva moghey to generate custom response format
+type Fallacy struct {
+    Success   bool   `json:"success"`
+    ErrorCode int    `json:"error_code,omitempty"`
+    Message   string `json:"message"`
+}
+
 // DEPRECATED, use DefaultResponseContentType(mime)
 var DefaultResponseMimeType string
 
@@ -262,4 +269,53 @@ func (r Response) ContentLength() int {
 // CloseNotify is part of http.CloseNotifier interface
 func (r Response) CloseNotify() <-chan bool {
     return r.ResponseWriter.(http.CloseNotifier).CloseNotify()
+}
+
+func (r *Response) RemoveSource() {
+    r.Source = ""
+}
+
+func (r *Response) WriteResp(value interface{}) error {
+    if value == nil { // do not write a nil representation
+        return nil
+    }
+    for _, qualifiedMime := range strings.Split(r.requestAccept, ",") {
+        mime := strings.Trim(strings.Split(qualifiedMime, ";")[0], " ")
+        if 0 == len(mime) || mime == "*/*" {
+            for _, each := range r.routeProduces {
+                if MIME_JSON == each {
+                    return r.WriteAsJson(value)
+                }
+                if MIME_XML == each {
+                    return r.WriteAsXml(value)
+                }
+            }
+        } else { // mime is not blank; see if we have a match in Produces
+            for _, each := range r.routeProduces {
+                if mime == each {
+                    if MIME_JSON == each {
+                        return r.WriteAsJson(value)
+                    }
+                    if MIME_XML == each {
+                        return r.WriteAsXml(value)
+                    }
+                }
+            }
+        }
+    }
+    if DefaultResponseMimeType == MIME_JSON {
+        return r.WriteAsJson(value)
+    } else if DefaultResponseMimeType == MIME_XML {
+        return r.WriteAsXml(value)
+    } else {
+        if trace {
+            traceLogger.Printf("mismatch in mime-types and no defaults; (http)Accept=%v,(route)Produces=%v\n", r.requestAccept, r.routeProduces)
+        }
+        r.WriteHeader(http.StatusNotAcceptable) // for recording only
+        r.ResponseWriter.WriteHeader(http.StatusNotAcceptable)
+        if _, err := r.Write([]byte("406: Not Acceptable")); err != nil {
+            return err
+        }
+    }
+    return nil
 }
