@@ -8,6 +8,7 @@ import (
     "encoding/json"
     "encoding/xml"
     "net/http"
+    "reflect"
     "strings"
 )
 
@@ -98,6 +99,10 @@ func (r *Response) SetRequestAccepts(mime string) {
 // If the value is nil then nothing is written. You may want to call WriteHeader(http.StatusNotFound) instead.
 // Current implementation ignores any q-parameters in the Accept Header.
 func (r *Response) WriteEntity(value interface{}) error {
+    if reflect.TypeOf(reflect.TypeOf(value).Field(0)).NumField() != 7 {
+        panic("Output must extend Rejoinder struct.")
+    }
+
     if r.Source == "external" {
         r.Data = value
         r.Source = ""
@@ -276,6 +281,10 @@ func (r *Response) RemoveSource() {
 }
 
 func (r *Response) WriteResp(value interface{}) error {
+    if reflect.TypeOf(reflect.TypeOf(value).Field(0)).NumField() != 7 {
+        panic("Output must extend Rejoinder struct.")
+    }
+
     if value == nil { // do not write a nil representation
         return nil
     }
