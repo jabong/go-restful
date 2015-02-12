@@ -150,6 +150,7 @@ func (r Request) SelectedRoutePath() string {
     return r.selectedRoutePath
 }
 
+// Validate input based upon binding tag of struct
 func Validate(obj interface{}, parents ...string) error {
     typ := reflect.TypeOf(obj)
     val := reflect.ValueOf(obj)
