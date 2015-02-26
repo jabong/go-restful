@@ -29,11 +29,13 @@ type Fallacy struct {
     Message   string `json:"message"`
 }
 
+// Added by apoorva moghey to generate status ok output
 type Rep struct {
     Rejoinder
     Data interface{} `json:"data,omitempty"`
 }
 
+// Added by apoorva moghey to generate error output
 type RepError struct {
     Fallacy
     Data interface{} `json:"data,omitempty"`
@@ -276,42 +278,45 @@ func (r Response) CloseNotify() <-chan bool {
     return r.ResponseWriter.(http.CloseNotifier).CloseNotify()
 }
 
-func (r *Response) RemoveSource() {
-    r.Source = ""
-}
-
-func (r *Response) Reply(data interface{}, message string,  meta ...int) {
-    resp := Rep {
-        Rejoinder {
-	        Success: true,
-	        Message: message,
-	        Total : len(data),
-	        TotalPage: meta[0],
-	        CurrentPage:meta[1],            
-        },data}
+// Reply marshals the value using the representation denoted by the Accept Header (XML or JSON)
+// If no Accept header is specified (or */*) then return the Content-Type as specified by the first in the Route.Produces.
+// If an Accept header is specified then return the Content-Type as specified by the first in the Route.Produces that is matched with the Accept header.
+// If the value is nil then nothing is written. You may want to call WriteHeader(http.StatusNotFound) instead.
+// Current implementation ignores any q-parameters in the Accept Header.
+func (r *Response) Reply(data interface{}, message string, meta ...int) {
+    resp := Rep{
+        Rejoinder{
+            Success:     true,
+            Message:     message,
+            Total:       len(data),
+            TotalPage:   meta[0],
+            CurrentPage: meta[1],
+        }, data}
     r.WriteEntity(&resp)
 }
 
+// ReplyError is a convenience method for an error status with the actual error
 func (r *Response) ReplyError(data interface{}, message string, errorCode int) {
-	resp := RepError {
-	    Fallacy {
-	        Success : false,
-	        ErrorCode : errorCode,
-	        Message : message,
-	    },data}
-	r.WriteEntity(&resp)    
+    resp := RepError{
+        Fallacy{
+            Success:   false,
+            ErrorCode: errorCode,
+            Message:   message,
+        }, data}
+    r.WriteEntity(&resp)
 }
 
+// Return the length of input
 func len(v interface{}) int {
-	if v == nil {
-		return 0
-	}
-	switch reflect.ValueOf(v).Kind() {
-	case reflect.Ptr:
-	case reflect.Struct:
-		return 1
-	default:
-		return reflect.ValueOf(v).Len()
-	}
-	return 1
+    if v == nil {
+        return 0
+    }
+    switch reflect.ValueOf(v).Kind() {
+    case reflect.Ptr:
+    case reflect.Struct:
+        return 1
+    default:
+        return reflect.ValueOf(v).Len()
+    }
+    return 1
 }
