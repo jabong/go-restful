@@ -289,9 +289,11 @@ func (r *Response) Reply(data interface{}, message string, meta ...int) {
             Success:     true,
             Message:     message,
             Total:       len(data),
-            TotalPage:   meta[0],
-            CurrentPage: meta[1],
         }, data}
+    if len(meta) == 2 {
+    	resp.Rejoinder.TotalPage = meta[0]
+    	resp.Rejoinder.CurrentPage = meta[1]
+    }
     r.WriteEntity(&resp)
 }
 
