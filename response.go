@@ -17,9 +17,9 @@ type Rejoinder struct {
     Success     bool   `json:"success"`
     ErrorCode   int    `json:"error_code,omitempty"`
     Message     string `json:"message"`
+    Total       int    `json:"total,omitempty"`
     TotalPage   int    `json:"total_page,omitempty"`
     CurrentPage int    `json:"current_page,omitempty"`
-    Total       int    `json:"total,omitempty"`
 }
 
 // Added by apoorva moghey to generate custom response format
@@ -27,6 +27,16 @@ type Fallacy struct {
     Success   bool   `json:"success"`
     ErrorCode int    `json:"error_code,omitempty"`
     Message   string `json:"message"`
+}
+
+type Rep struct {
+    Rejoinder
+    Data interface{} `json:"data,omitempty"`
+}
+
+type RepError struct {
+    Fallacy
+    Data interface{} `json:"data,omitempty"`
 }
 
 // DEPRECATED, use DefaultResponseContentType(mime)
@@ -99,16 +109,6 @@ func (r *Response) SetRequestAccepts(mime string) {
 // If the value is nil then nothing is written. You may want to call WriteHeader(http.StatusNotFound) instead.
 // Current implementation ignores any q-parameters in the Accept Header.
 func (r *Response) WriteEntity(value interface{}) error {
-    if reflect.TypeOf(reflect.TypeOf(value).Field(0)).NumField() != 7 {
-        panic("Output must extend Rejoinder struct.")
-    }
-
-    if r.Source == "external" {
-        r.Data = value
-        r.Source = ""
-        return nil
-    }
-
     if value == nil { // do not write a nil representation
         return nil
     }
@@ -280,51 +280,38 @@ func (r *Response) RemoveSource() {
     r.Source = ""
 }
 
-func (r *Response) WriteResp(value interface{}) error {
-    if reflect.TypeOf(reflect.TypeOf(value).Field(0)).NumField() != 7 {
-        panic("Output must extend Rejoinder struct.")
-    }
+func (r *Response) Reply(data interface{}, message string,  meta ...int) {
+    resp := Rep {
+        Rejoinder {
+	        Success: true,
+	        Message: message,
+	        Total : len(data),
+	        TotalPage: meta[0],
+	        CurrentPage:meta[1],            
+        },data}
+    r.WriteEntity(&resp)
+}
 
-    if value == nil { // do not write a nil representation
-        return nil
-    }
-    for _, qualifiedMime := range strings.Split(r.requestAccept, ",") {
-        mime := strings.Trim(strings.Split(qualifiedMime, ";")[0], " ")
-        if 0 == len(mime) || mime == "*/*" {
-            for _, each := range r.routeProduces {
-                if MIME_JSON == each {
-                    return r.WriteAsJson(value)
-                }
-                if MIME_XML == each {
-                    return r.WriteAsXml(value)
-                }
-            }
-        } else { // mime is not blank; see if we have a match in Produces
-            for _, each := range r.routeProduces {
-                if mime == each {
-                    if MIME_JSON == each {
-                        return r.WriteAsJson(value)
-                    }
-                    if MIME_XML == each {
-                        return r.WriteAsXml(value)
-                    }
-                }
-            }
-        }
-    }
-    if DefaultResponseMimeType == MIME_JSON {
-        return r.WriteAsJson(value)
-    } else if DefaultResponseMimeType == MIME_XML {
-        return r.WriteAsXml(value)
-    } else {
-        if trace {
-            traceLogger.Printf("mismatch in mime-types and no defaults; (http)Accept=%v,(route)Produces=%v\n", r.requestAccept, r.routeProduces)
-        }
-        r.WriteHeader(http.StatusNotAcceptable) // for recording only
-        r.ResponseWriter.WriteHeader(http.StatusNotAcceptable)
-        if _, err := r.Write([]byte("406: Not Acceptable")); err != nil {
-            return err
-        }
-    }
-    return nil
+func (r *Response) ReplyError(data interface{}, message string, errorCode int) {
+	resp := RepError {
+	    Fallacy {
+	        Success : false,
+	        ErrorCode : errorCode,
+	        Message : message,
+	    },data}
+	r.WriteEntity(&resp)    
+}
+
+func len(v interface{}) int {
+	if v == nil {
+		return 0
+	}
+	switch reflect.ValueOf(v).Kind() {
+	case reflect.Ptr:
+	case reflect.Struct:
+		return 1
+	default:
+		return reflect.ValueOf(v).Len()
+	}
+	return 1
 }
