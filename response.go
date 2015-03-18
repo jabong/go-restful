@@ -288,7 +288,7 @@ func (r *Response) Reply(data interface{}, message string, meta ...int) {
         Rejoinder{
             Success:     true,
             Message:     message,
-            Total:       len(data),
+            Total:       length(data),
         }, data}
     if len(meta) == 2 {
     	resp.Rejoinder.TotalPage = meta[0]
@@ -309,13 +309,15 @@ func (r *Response) ReplyError(data interface{}, message string, errorCode int) {
 }
 
 // Return the length of input
-func len(v interface{}) int {
+func length(v interface{}) int {
     if v == nil {
         return 0
     }
+
     switch reflect.ValueOf(v).Kind() {
     case reflect.Ptr:
     case reflect.Struct:
+    case reflect.Map:
         return 1
     default:
         return reflect.ValueOf(v).Len()
