@@ -7,10 +7,12 @@ package restful
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"net/http"
+	"os"
 	"runtime"
 	"strings"
+
+	"github.com/jabong/go-restful/log"
 )
 
 // Container holds a collection of WebServices and a http.ServeMux to dispatch http requests.
@@ -52,8 +54,9 @@ func (c *Container) RecoverHandler(handler RecoverHandleFunction) {
 }
 
 // ServiceErrorHandleFunction declares functions that can be used to handle a service error situation.
-// The first argument is the service error. The second must be used to communicate an error response.
-type ServiceErrorHandleFunction func(ServiceError, *Response)
+// The first argument is the service error, the second is the request that resulted in the error and
+// the third must be used to communicate an error response.
+type ServiceErrorHandleFunction func(ServiceError, *Request, *Response)
 
 // ServiceErrorHandler changes the default function (writeServiceError) to be called
 // when a ServiceError is detected.
@@ -107,7 +110,8 @@ func (c *Container) Add(service *WebService) *Container {
 	// cannot have duplicate root paths
 	for _, each := range c.webServices {
 		if each.RootPath() == service.RootPath() {
-			log.Fatalf("[restful] WebService with duplicate root path detected:['%v']", each)
+			log.Printf("[restful] WebService with duplicate root path detected:['%v']", each)
+			os.Exit(1)
 		}
 	}
 	// if rootPath was not set then lazy initialize it
@@ -132,7 +136,7 @@ func logStackOnRecover(panicReason interface{}, httpWriter http.ResponseWriter) 
 		}
 		buffer.WriteString(fmt.Sprintf("    %s:%d\r\n", file, line))
 	}
-	log.Println(buffer.String())
+	log.Print(buffer.String())
 	httpWriter.WriteHeader(http.StatusInternalServerError)
 	httpWriter.Write(buffer.Bytes())
 }
@@ -140,7 +144,7 @@ func logStackOnRecover(panicReason interface{}, httpWriter http.ResponseWriter) 
 // writeServiceError is the default ServiceErrorHandleFunction and is called
 // when a ServiceError is returned during route selection. Default implementation
 // calls resp.WriteErrorString(err.Code, err.Message)
-func writeServiceError(err ServiceError, resp *Response) {
+func writeServiceError(err ServiceError, req *Request, resp *Response) {
 	resp.WriteErrorString(err.Code, err.Message)
 }
 
@@ -171,7 +175,7 @@ func (c *Container) dispatch(httpWriter http.ResponseWriter, httpRequest *http.R
 			var err error
 			writer, err = NewCompressingResponseWriter(httpWriter, encoding)
 			if err != nil {
-				log.Println("[restful] unable to install compressor:", err)
+				log.Print("[restful] unable to install compressor: ", err)
 				httpWriter.WriteHeader(http.StatusInternalServerError)
 				return
 			}
@@ -191,7 +195,7 @@ func (c *Container) dispatch(httpWriter http.ResponseWriter, httpRequest *http.R
 			switch err.(type) {
 			case ServiceError:
 				ser := err.(ServiceError)
-				c.serviceErrorHandleFunc(ser, resp)
+				c.serviceErrorHandleFunc(ser, req, resp)
 			}
 			// TODO
 		}}

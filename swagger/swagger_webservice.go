@@ -4,12 +4,13 @@ import (
 	"fmt"
 
 	"github.com/jabong/go-restful"
-	// "github.com/jabong/hopwatch"
-	"log"
+	// "github.com/emicklei/hopwatch"
 	"net/http"
 	"reflect"
 	"sort"
 	"strings"
+
+	"github.com/jabong/go-restful/log"
 )
 
 type SwaggerService struct {
@@ -24,7 +25,10 @@ func newSwaggerService(config Config) *SwaggerService {
 }
 
 // LogInfo is the function that is called when this package needs to log. It defaults to log.Printf
-var LogInfo = log.Printf
+var LogInfo = func(format string, v ...interface{}) {
+	// use the restful package-wide logger
+	log.Printf(format, v...)
+}
 
 // InstallSwaggerService add the WebService that provides the API documentation of all services
 // conform the Swagger documentation specifcation. (https://github.com/wordnik/swagger-core/wiki).
@@ -71,6 +75,11 @@ func RegisterSwaggerService(config Config, wsContainer *restful.Container) {
 				sws.apiDeclarationMap[each.RootPath()] = sws.composeDeclaration(each, each.RootPath())
 			}
 		}
+	}
+
+	// if specified then call the PostBuilderHandler
+	if config.PostBuildHandler != nil {
+		config.PostBuildHandler(sws.apiDeclarationMap)
 	}
 
 	// Check paths for UI serving
@@ -290,7 +299,7 @@ func (sws SwaggerService) addModelFromSampleTo(operation *Operation, isResponse 
 		}
 		operation.Type = modelName
 	}
-	modelBuilder{models}.addModel(reflect.TypeOf(sample), "")
+	modelBuilder{models}.addModelFrom(sample)
 }
 
 func asSwaggerParameter(param restful.ParameterData) Parameter {
