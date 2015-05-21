@@ -8,8 +8,8 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"net/http"
-	"strings"
 	"reflect"
+	"strings"
 )
 
 // DEPRECATED, use DefaultResponseContentType(mime)
@@ -248,31 +248,31 @@ func (r Response) CloseNotify() <-chan bool {
 
 // Added by apoorva moghey to generate custom response format
 type Rejoinder struct {
-    Success     bool   `json:"success"`
-    ErrorCode   int    `json:"error_code,omitempty"`
-    Message     string `json:"message"`
-    Total       int    `json:"total,omitempty"`
-    TotalPage   int    `json:"total_page,omitempty"`
-    CurrentPage int    `json:"current_page,omitempty"`
+	Success     bool        `json:"success"`
+	ErrorCode   int         `json:"error_code,omitempty"`
+	Message     interface{} `json:"message"`
+	Total       int         `json:"total,omitempty"`
+	TotalPage   int         `json:"total_page,omitempty"`
+	CurrentPage int         `json:"current_page,omitempty"`
 }
 
 // Added by apoorva moghey to generate custom response format
 type Fallacy struct {
-    Success   bool   `json:"success"`
-    ErrorCode int    `json:"error_code,omitempty"`
-    Message   string `json:"message"`
+	Success   bool        `json:"success"`
+	ErrorCode int         `json:"error_code,omitempty"`
+	Message   interface{} `json:"message"`
 }
 
 // Added by apoorva moghey to generate status ok output
 type Rep struct {
-    Rejoinder
-    Data interface{} `json:"data,omitempty"`
+	Rejoinder
+	Data interface{} `json:"data,omitempty"`
 }
 
 // Added by apoorva moghey to generate error output
 type RepError struct {
-    Fallacy
-    Data interface{} `json:"data,omitempty"`
+	Fallacy
+	Data interface{} `json:"data,omitempty"`
 }
 
 // Reply marshals the value using the representation denoted by the Accept Header (XML or JSON)
@@ -280,44 +280,44 @@ type RepError struct {
 // If an Accept header is specified then return the Content-Type as specified by the first in the Route.Produces that is matched with the Accept header.
 // If the value is nil then nothing is written. You may want to call WriteHeader(http.StatusNotFound) instead.
 // Current implementation ignores any q-parameters in the Accept Header.
-func (r *Response) Reply(data interface{}, message string, meta ...int) {
-    resp := Rep{
-        Rejoinder{
-            Success:     true,
-            Message:     message,
-            Total:       length(data),
-        }, data}
-    if len(meta) == 2 {
-    	resp.Rejoinder.TotalPage = meta[0]
-    	resp.Rejoinder.CurrentPage = meta[1]
-    }
-    r.WriteEntity(&resp)
+func (r *Response) Reply(data interface{}, message interface{}, meta ...int) {
+	resp := Rep{
+		Rejoinder{
+			Success: true,
+			Message: message,
+			Total:   length(data),
+		}, data}
+	if len(meta) == 2 {
+		resp.Rejoinder.TotalPage = meta[0]
+		resp.Rejoinder.CurrentPage = meta[1]
+	}
+	r.WriteEntity(&resp)
 }
 
 // ReplyError is a convenience method for an error status with the actual error
-func (r *Response) ReplyError(data interface{}, message string, errorCode int) {
-    resp := RepError{
-        Fallacy{
-            Success:   false,
-            ErrorCode: errorCode,
-            Message:   message,
-        }, data}
-    r.WriteEntity(&resp)
+func (r *Response) ReplyError(data interface{}, message interface{}, errorCode int) {
+	resp := RepError{
+		Fallacy{
+			Success:   false,
+			ErrorCode: errorCode,
+			Message:   message,
+		}, data}
+	r.WriteEntity(&resp)
 }
 
 // Return the length of input
 func length(v interface{}) int {
-    if v == nil {
-        return 0
-    }
+	if v == nil {
+		return 0
+	}
 
-    switch reflect.ValueOf(v).Kind() {
-    case reflect.Ptr:
-    case reflect.Struct:
-    case reflect.Map:
-        return 1
-    default:
-        return reflect.ValueOf(v).Len()
-    }
-    return 1
+	switch reflect.ValueOf(v).Kind() {
+	case reflect.Ptr:
+	case reflect.Struct:
+	case reflect.Map:
+		return 1
+	default:
+		return reflect.ValueOf(v).Len()
+	}
+	return 1
 }
